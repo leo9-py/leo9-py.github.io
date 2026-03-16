@@ -17,10 +17,6 @@ interface Particle {
   flashSpeed: number
 }
 
-interface Props {
-  height?: number
-}
-
 function buildPalette(darkMode: boolean, schemeIndex: number): string[] {
   const scheme = COLOR_SCHEMES[schemeIndex] ?? COLOR_SCHEMES[0]
   const baseHex = darkMode ? scheme.particle.dark : scheme.particle.light
@@ -41,7 +37,7 @@ function buildPalette(darkMode: boolean, schemeIndex: number): string[] {
       ]
 }
 
-export default function ParticleCanvas({ height = 320 }: Props) {
+export default function ParticleCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { settings } = useSettings()
   const animRef = useRef<number>(0)

@@ -143,7 +143,6 @@ export default function Header() {
 
     function step() {
       const phase = phaseRef.current
-      const phrase = DESCRIPTORS[phraseIdxRef.current]
 
       if (phase === 'paused') {
         // Full text visible — wait, then highlight
@@ -231,7 +230,7 @@ export default function Header() {
       <GodLight />
 
       {/* Particle layer */}
-      <ParticleCanvas height={320} />
+      <ParticleCanvas />
 
       {/* Wave at bottom of header */}
       <WaveEffect position="bottom" />
@@ -367,7 +366,7 @@ interface ContactItemProps {
   accentRgb: [number, number, number]
 }
 
-function ContactItem({ icon, label, href, external, isDark, accentRgb }: ContactItemProps) {
+function ContactItem({ icon, label, href, external }: ContactItemProps) {
   return (
     <Box
       sx={{
