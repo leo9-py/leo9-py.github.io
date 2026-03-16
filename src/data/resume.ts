@@ -49,7 +49,7 @@ export const resumeData = {
       name: 'Fully local AI-powered desktop companion app',
       date: 'March 2026',
       stack: 'Ollama, Electron, React and TypeScript',
-      githubUrl: '#',
+      githubUrl: 'https://github.com/leo9-py/desktop-pet',
       bullets: [
         'Built a privacy-first local AI desktop companion using Electron, React 18, and TypeScript with a fully local LLM via Ollama.',
         'Implemented active window tracking via PowerShell/Win32 API and idle detection using Electron\'s power monitor to drive context-aware, trigger-based AI responses with cooldown and error backoff logic.',
