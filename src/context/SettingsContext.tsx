@@ -17,9 +17,9 @@ interface SettingsContextValue {
 
 const defaults: Settings = {
   darkMode: true,
-  gaussian: true,
+  gaussian: false,
   particles: true,
-  pulsate: true,
+  pulsate: false,
   waves: true,
   colorScheme: 0,
 }
