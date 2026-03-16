@@ -35,7 +35,7 @@ export default function OpenSource() {
                     href={project.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'primary.main' }}
+                    sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'var(--theme-primary)' }}
                   >
                     <GitHubIcon fontSize="small" />
                   </Link>
@@ -48,7 +48,7 @@ export default function OpenSource() {
                 />
               </Box>
 
-              <Typography variant="caption" sx={{ color: 'secondary.main', fontStyle: 'italic', display: 'block', mb: 1.5 }}>
+              <Typography variant="caption" sx={{ color: 'var(--theme-secondary)', fontStyle: 'italic', display: 'block', mb: 1.5 }}>
                 {project.stack}
               </Typography>
 
@@ -60,7 +60,7 @@ export default function OpenSource() {
                     sx={{
                       mb: 0.75,
                       color: 'text.secondary',
-                      '&::marker': { color: 'primary.main' },
+                      '&::marker': { color: 'var(--theme-primary)' },
                     }}
                   >
                     <Typography variant="body2" sx={{ lineHeight: 1.7 }}>

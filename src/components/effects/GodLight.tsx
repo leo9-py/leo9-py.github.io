@@ -1,12 +1,50 @@
 import { useEffect, useRef } from 'react'
 import Box from '@mui/material/Box'
 import { useSettings } from '../../context/SettingsContext'
+import { COLOR_SCHEMES } from '../../data/colorSchemes'
+import { lighten, darken } from '../../utils/color'
+
+type RGB = [number, number, number]
+
+function lerpRgb(a: RGB, b: RGB, t: number): RGB {
+  return [
+    a[0] + (b[0] - a[0]) * t,
+    a[1] + (b[1] - a[1]) * t,
+    a[2] + (b[2] - a[2]) * t,
+  ]
+}
+
+function rgbStr(c: RGB): string {
+  return `${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])}`
+}
 
 export default function GodLight() {
   const { settings } = useSettings()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animRef   = useRef<number>(0)
 
+  // Target colors (updated instantly when scheme changes)
+  const targetRef = useRef<{ base: RGB; mid: RGB; bright: RGB; deep: RGB }>({
+    base: [80, 140, 220], mid: [96, 156, 228], bright: [147, 189, 240], deep: [40, 70, 110],
+  })
+  // Current (rendered) colors — lerped toward target each frame
+  const currentRef = useRef<{ base: RGB; mid: RGB; bright: RGB; deep: RGB }>({
+    base: [80, 140, 220], mid: [96, 156, 228], bright: [147, 189, 240], deep: [40, 70, 110],
+  })
+
+  // Update target when scheme/darkMode changes
+  useEffect(() => {
+    const scheme = COLOR_SCHEMES[settings.colorScheme] ?? COLOR_SCHEMES[0]
+    const glowBase: RGB = settings.darkMode ? scheme.glow.dark : scheme.glow.light
+    targetRef.current = {
+      base: glowBase,
+      mid: lighten(glowBase, 0.2),
+      bright: lighten(glowBase, 0.45),
+      deep: darken(glowBase, 0.5),
+    }
+  }, [settings.darkMode, settings.colorScheme])
+
+  // Single animation loop — never restarts on scheme change
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -24,6 +62,9 @@ export default function GodLight() {
     const ro = new ResizeObserver(resize)
     ro.observe(canvas)
 
+    // Initialize current to target
+    currentRef.current = { ...targetRef.current }
+
     let t = 0
     let lastTs: number | null = null
 
@@ -33,65 +74,55 @@ export default function GodLight() {
       lastTs = ts
       t += dt
 
+      // Lerp current colors toward target (~0.5s transition)
+      const lerpSpeed = Math.min(1, dt * 2.8)
+      const cur = currentRef.current
+      const tgt = targetRef.current
+      cur.base   = lerpRgb(cur.base, tgt.base, lerpSpeed)
+      cur.mid    = lerpRgb(cur.mid, tgt.mid, lerpSpeed)
+      cur.bright = lerpRgb(cur.bright, tgt.bright, lerpSpeed)
+      cur.deep   = lerpRgb(cur.deep, tgt.deep, lerpSpeed)
+
       const w = canvas.offsetWidth
       const h = canvas.offsetHeight
       const diag = Math.sqrt(w * w + h * h)
 
       ctx.clearRect(0, 0, w, h)
 
-      // Slow global pulse
       const pulse = 0.82 + 0.18 * Math.sin(t * 0.11)
-      // Origin sits well above/left of the corner so light sweeps downward diagonally
-      // Moves more freely to give the light a roaming feel
       const ox = w * -0.18 + Math.sin(t * 0.11) * w * 0.14
       const oy = h * -0.22 + Math.sin(t * 0.09 + 0.8) * h * 0.12
 
-      const isDark = settings.darkMode
+      const base = rgbStr(cur.base)
+      const mid = rgbStr(cur.mid)
+      const bright = rgbStr(cur.bright)
+      const deep = rgbStr(cur.deep)
 
-      // Outer halo — deep indigo/violet wash
+      // Outer halo
       const r0 = diag * (0.95 + 0.05 * Math.sin(t * 0.09))
       const g0 = ctx.createRadialGradient(ox, oy, 0, ox, oy, r0)
-      if (isDark) {
-        g0.addColorStop(0,    `rgba(80,140,220,${0.22 * pulse})`)
-        g0.addColorStop(0.30, `rgba(60,100,190,${0.10 * pulse})`)
-        g0.addColorStop(0.60, `rgba(40,60,140,${0.032 * pulse})`)
-        g0.addColorStop(1,    'rgba(20,30,80,0)')
-      } else {
-        g0.addColorStop(0,    `rgba(255,235,170,${0.16 * pulse})`)
-        g0.addColorStop(0.30, `rgba(240,200,120,${0.07 * pulse})`)
-        g0.addColorStop(0.60, `rgba(200,160,80,${0.022 * pulse})`)
-        g0.addColorStop(1,    'rgba(160,120,40,0)')
-      }
+      g0.addColorStop(0,    `rgba(${base},${0.22 * pulse})`)
+      g0.addColorStop(0.30, `rgba(${mid},${0.10 * pulse})`)
+      g0.addColorStop(0.60, `rgba(${deep},${0.032 * pulse})`)
+      g0.addColorStop(1,    `rgba(${deep},0)`)
       ctx.fillStyle = g0
       ctx.fillRect(0, 0, w, h)
 
-      // Mid layer — teal/cyan shift for color depth
+      // Mid layer
       const r1m = diag * (0.55 + 0.06 * Math.sin(t * 0.08 + 2.1))
       const gm = ctx.createRadialGradient(ox, oy, 0, ox, oy, r1m)
-      if (isDark) {
-        gm.addColorStop(0,    `rgba(60,180,200,${0.10 * pulse})`)
-        gm.addColorStop(0.45, `rgba(40,130,170,${0.038 * pulse})`)
-        gm.addColorStop(1,    'rgba(20,80,120,0)')
-      } else {
-        gm.addColorStop(0,    `rgba(255,210,120,${0.08 * pulse})`)
-        gm.addColorStop(0.45, `rgba(230,170,80,${0.030 * pulse})`)
-        gm.addColorStop(1,    'rgba(180,130,40,0)')
-      }
+      gm.addColorStop(0,    `rgba(${mid},${0.10 * pulse})`)
+      gm.addColorStop(0.45, `rgba(${base},${0.038 * pulse})`)
+      gm.addColorStop(1,    `rgba(${deep},0)`)
       ctx.fillStyle = gm
       ctx.fillRect(0, 0, w, h)
 
-      // Inner bright core — punchy near the corner
+      // Inner bright core
       const r1 = diag * (0.32 + 0.04 * Math.sin(t * 0.13 + 1.2))
       const g1 = ctx.createRadialGradient(ox, oy, 0, ox, oy, r1)
-      if (isDark) {
-        g1.addColorStop(0,    `rgba(160,220,255,${0.32 * pulse})`)
-        g1.addColorStop(0.35, `rgba(100,180,240,${0.12 * pulse})`)
-        g1.addColorStop(1,    'rgba(60,120,200,0)')
-      } else {
-        g1.addColorStop(0,    `rgba(255,255,220,${0.24 * pulse})`)
-        g1.addColorStop(0.35, `rgba(255,230,160,${0.09 * pulse})`)
-        g1.addColorStop(1,    'rgba(220,180,80,0)')
-      }
+      g1.addColorStop(0,    `rgba(${bright},${0.32 * pulse})`)
+      g1.addColorStop(0.35, `rgba(${base},${0.12 * pulse})`)
+      g1.addColorStop(1,    `rgba(${deep},0)`)
       ctx.fillStyle = g1
       ctx.fillRect(0, 0, w, h)
 
@@ -104,7 +135,7 @@ export default function GodLight() {
       cancelAnimationFrame(animRef.current)
       ro.disconnect()
     }
-  }, [settings.darkMode])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Box
@@ -113,7 +144,6 @@ export default function GodLight() {
         inset: 0,
         pointerEvents: 'none',
         overflow: 'hidden',
-        // No explicit zIndex — DOM order (first child) keeps it behind waves and particles
       }}
     >
       <canvas

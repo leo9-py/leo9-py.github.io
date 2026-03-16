@@ -12,7 +12,7 @@ export default function SectionTitle({ title, icon }: Props) {
     <Box sx={{ mb: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         {icon && (
-          <Box sx={{ color: 'primary.main', display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ color: 'var(--theme-primary)', display: 'flex', alignItems: 'center', transition: 'color 0.5s ease' }}>
             {icon}
           </Box>
         )}

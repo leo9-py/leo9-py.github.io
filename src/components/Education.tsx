@@ -29,7 +29,7 @@ export default function Education() {
                   <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', lineHeight: 1.3 }}>
                     {edu.degree}
                   </Typography>
-                  <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 500, mt: 0.25 }}>
+                  <Typography variant="subtitle2" sx={{ color: 'var(--theme-primary)', fontWeight: 500, mt: 0.25 }}>
                     {edu.school}
                   </Typography>
                   <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -44,8 +44,8 @@ export default function Education() {
                     sx={{ borderColor: 'rgba(100,181,246,0.3)', color: 'text.secondary', fontSize: '0.75rem' }}
                   />
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <StarIcon sx={{ fontSize: 14, color: 'secondary.main' }} />
-                    <Typography variant="caption" sx={{ color: 'secondary.main', fontWeight: 600 }}>
+                    <StarIcon sx={{ fontSize: 14, color: 'var(--theme-secondary)' }} />
+                    <Typography variant="caption" sx={{ color: 'var(--theme-secondary)', fontWeight: 600 }}>
                       GPA {edu.gpa}
                     </Typography>
                   </Box>

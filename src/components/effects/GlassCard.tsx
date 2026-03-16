@@ -3,6 +3,8 @@ import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import type { SxProps, Theme } from '@mui/material/styles'
 import { useSettings } from '../../context/SettingsContext'
+import { useColorScheme } from '../../hooks/useColorScheme'
+import { hexToRgb } from '../../utils/color'
 
 interface Props {
   children: React.ReactNode
@@ -19,6 +21,8 @@ export default function GlassCard({ children, sx }: Props) {
   const [hovered, setHovered] = useState(false)
 
   const isDark = settings.darkMode
+  const scheme = useColorScheme()
+  const accentRgb = hexToRgb(isDark ? scheme.primary.dark : scheme.primary.light)
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const el = ref.current
@@ -77,12 +81,12 @@ export default function GlassCard({ children, sx }: Props) {
             // Elevated shadow when tilted
             ...(hovered && {
               boxShadow: isDark
-                ? `0 ${8 + Math.abs(tiltX) * 2}px ${24 + Math.abs(tiltX) * 4}px rgba(0,0,0,0.5),
-                   0 0 0 1px rgba(100,181,246,0.25),
-                   inset 0 1px 0 rgba(255,255,255,0.06)`
-                : `0 ${8 + Math.abs(tiltX) * 2}px ${24 + Math.abs(tiltX) * 4}px rgba(0,60,140,0.18),
-                   0 0 0 1px rgba(0,80,160,0.18),
-                   inset 0 1px 0 rgba(255,255,255,0.7)`,
+                ? `0 ${6 + Math.abs(tiltX)}px ${16 + Math.abs(tiltX) * 2}px rgba(0,0,0,0.35),
+                   0 0 0 1px rgba(${accentRgb},0.12),
+                   inset 0 1px 0 rgba(255,255,255,0.04)`
+                : `0 ${6 + Math.abs(tiltX)}px ${16 + Math.abs(tiltX) * 2}px rgba(${accentRgb},0.10),
+                   0 0 0 1px rgba(${accentRgb},0.10),
+                   inset 0 1px 0 rgba(255,255,255,0.5)`,
             }),
           }),
           ...sx,
@@ -101,8 +105,8 @@ export default function GlassCard({ children, sx }: Props) {
               transition: hovered ? 'opacity 0.05s' : 'opacity 0.4s ease',
               background: `radial-gradient(circle at ${shineX}% ${shineY}%,
                 ${isDark
-                  ? 'rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.05) 30%, transparent 60%'
-                  : 'rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 30%, transparent 60%'
+                  ? 'rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.025) 30%, transparent 60%'
+                  : 'rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.10) 30%, transparent 60%'
                 })`,
             }}
           />

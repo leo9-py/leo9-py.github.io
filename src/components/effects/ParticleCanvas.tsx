@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
 import Box from '@mui/material/Box'
 import { useSettings } from '../../context/SettingsContext'
+import { COLOR_SCHEMES } from '../../data/colorSchemes'
+import { hexToRgb, lighten } from '../../utils/color'
 
 interface Particle {
   x: number
@@ -19,12 +21,39 @@ interface Props {
   height?: number
 }
 
+function buildPalette(darkMode: boolean, schemeIndex: number): string[] {
+  const scheme = COLOR_SCHEMES[schemeIndex] ?? COLOR_SCHEMES[0]
+  const baseHex = darkMode ? scheme.particle.dark : scheme.particle.light
+  const baseRgb = hexToRgb(baseHex)
+  return darkMode
+    ? [
+        baseHex,
+        `rgb(${lighten(baseRgb, 0.35)})`,
+        `rgb(${lighten(baseRgb, 0.55)})`,
+        '#ffffff',
+        `rgb(${lighten(baseRgb, 0.2)})`,
+      ]
+    : [
+        baseHex,
+        `rgb(${lighten(baseRgb, 0.25)})`,
+        `rgb(${lighten(baseRgb, 0.5)})`,
+        `rgb(${baseRgb})`,
+      ]
+}
+
 export default function ParticleCanvas({ height = 320 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { settings } = useSettings()
   const animRef = useRef<number>(0)
   const particlesRef = useRef<Particle[]>([])
+  const paletteRef = useRef<string[]>(buildPalette(true, 0))
 
+  // Update palette ref when scheme changes — no animation restart
+  useEffect(() => {
+    paletteRef.current = buildPalette(settings.darkMode, settings.colorScheme)
+  }, [settings.darkMode, settings.colorScheme])
+
+  // Animation loop — only restarts when particles toggled
   useEffect(() => {
     if (!settings.particles) return
 
@@ -40,22 +69,21 @@ export default function ParticleCanvas({ height = 320 }: Props) {
     resize()
     window.addEventListener('resize', resize)
 
-    const colors = settings.darkMode
-      ? ['#a8d8ff', '#c8e8ff', '#e0b4ff', '#ffffff', '#b0eaff', '#ffe0a0', '#ffd0f0']
-      : ['#2090ff', '#40b0ff', '#a040e0', '#20c0ff', '#0060c0', '#ff80a0', '#80d0ff']
-
-    const spawn = (): Particle => ({
-      x: Math.random() * canvas.width,
-      y: canvas.height + 4,
-      vx: (Math.random() - 0.5) * 0.25,
-      vy: -(Math.random() * 0.4 + 0.1),
-      radius: Math.random() * 2.2 + 0.6,
-      alpha: Math.random() * 0.5 + 0.5,
-      alphaDecay: Math.random() * 0.0008 + 0.0003,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      flashPhase: Math.random() * Math.PI * 2,
-      flashSpeed: 0.5 + Math.random() * 0.8,
-    })
+    const spawn = (): Particle => {
+      const colors = paletteRef.current
+      return {
+        x: Math.random() * canvas.width,
+        y: canvas.height + 4,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: -(Math.random() * 0.4 + 0.1),
+        radius: Math.random() * 2.2 + 0.6,
+        alpha: Math.random() * 0.5 + 0.5,
+        alphaDecay: Math.random() * 0.0008 + 0.0003,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        flashPhase: Math.random() * Math.PI * 2,
+        flashSpeed: 0.5 + Math.random() * 0.8,
+      }
+    }
 
     for (let i = 0; i < 18; i++) {
       const p = spawn()
@@ -141,7 +169,7 @@ export default function ParticleCanvas({ height = 320 }: Props) {
       window.removeEventListener('resize', resize)
       particlesRef.current = []
     }
-  }, [settings.particles, settings.darkMode])
+  }, [settings.particles]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!settings.particles) return null
 

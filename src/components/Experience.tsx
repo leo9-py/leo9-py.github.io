@@ -29,7 +29,7 @@ export default function Experience() {
                   <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', lineHeight: 1.3 }}>
                     {job.role}
                   </Typography>
-                  <Typography variant="subtitle1" sx={{ color: 'primary.main', fontWeight: 500 }}>
+                  <Typography variant="subtitle1" sx={{ color: 'var(--theme-primary)', fontWeight: 500 }}>
                     {job.company}
                   </Typography>
                 </Box>
@@ -54,7 +54,7 @@ export default function Experience() {
                     sx={{
                       mb: 0.75,
                       color: 'text.secondary',
-                      '&::marker': { color: 'primary.main' },
+                      '&::marker': { color: 'var(--theme-primary)' },
                     }}
                   >
                     <Typography variant="body2" sx={{ lineHeight: 1.7 }}>

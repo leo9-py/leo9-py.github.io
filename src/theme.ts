@@ -1,18 +1,37 @@
 import { createTheme, type Theme } from '@mui/material/styles'
+import { COLOR_SCHEMES } from './data/colorSchemes'
+import { hexToRgb } from './utils/color'
 
-export function buildTheme(dark: boolean): Theme {
+/** Blend a tiny fraction of the accent color into a base color */
+function tint(base: [number, number, number], accent: [number, number, number], amount: number): string {
+  const r = Math.round(base[0] + (accent[0] - base[0]) * amount)
+  const g = Math.round(base[1] + (accent[1] - base[1]) * amount)
+  const b = Math.round(base[2] + (accent[2] - base[2]) * amount)
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
+}
+
+export function buildTheme(dark: boolean, schemeIndex = 0): Theme {
+  const scheme = COLOR_SCHEMES[schemeIndex] ?? COLOR_SCHEMES[0]
+  const primary = dark ? scheme.primary.dark : scheme.primary.light
+  const secondary = dark ? scheme.secondary.dark : scheme.secondary.light
+  const accentRgb = hexToRgb(primary)
+
+  // Subtly tint backgrounds with the accent color
+  const bgDefault = dark
+    ? tint([13, 17, 23], accentRgb, 0.06)
+    : tint([240, 244, 248], accentRgb, 0.04)
+  const bgPaper = dark
+    ? tint([22, 27, 34], accentRgb, 0.05)
+    : tint([255, 255, 255], accentRgb, 0.02)
+
   return createTheme({
     palette: {
       mode: dark ? 'dark' : 'light',
-      primary: {
-        main: dark ? '#64b5f6' : '#0050a0',
-      },
-      secondary: {
-        main: dark ? '#ce93d8' : '#7b1fa2',
-      },
+      primary: { main: primary },
+      secondary: { main: secondary },
       background: {
-        default: dark ? '#0d1117' : '#f0f4f8',
-        paper: dark ? '#161b22' : '#ffffff',
+        default: bgDefault,
+        paper: bgPaper,
       },
       text: {
         primary: dark ? '#e6edf3' : '#0a1929',
@@ -37,8 +56,8 @@ export function buildTheme(dark: boolean): Theme {
           root: {
             backgroundImage: 'none',
             border: dark
-              ? '1px solid rgba(48, 54, 61, 0.8)'
-              : '1px solid rgba(0, 80, 160, 0.12)',
+              ? `1px solid rgba(${accentRgb}, 0.12)`
+              : `1px solid rgba(${accentRgb}, 0.10)`,
           },
         },
       },
