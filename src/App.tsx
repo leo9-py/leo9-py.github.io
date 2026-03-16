@@ -187,8 +187,18 @@ function ResumeContent() {
           />
           {settings.particles && <ParticleCanvas />}
           {settings.waves && <WaveEffect position="bottom" flip />}
-          <Box sx={{ position: 'relative', zIndex: 2, color: 'text.secondary', fontSize: '0.8rem' }}>
+          <Box sx={{ position: 'relative', zIndex: 2, color: 'text.secondary', fontSize: '0.8rem', textAlign: 'center' }}>
             Leo Dan Peña · {new Date().getFullYear()}
+            <br />
+            <Box
+              component="a"
+              href="https://github.com/leo9-py/leo9-py.github.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ color: 'text.secondary', opacity: 0.7, '&:hover': { opacity: 1 } }}
+            >
+              Source on GitHub
+            </Box>
           </Box>
         </Box>
       </Box>
