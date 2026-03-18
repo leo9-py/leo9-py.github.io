@@ -2,8 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
-import Collapse from '@mui/material/Collapse'
-import Fade from '@mui/material/Fade'
+import Grow from '@mui/material/Grow'
 import SettingsIcon from '@mui/icons-material/Settings'
 import FlareIcon from '@mui/icons-material/Flare'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
@@ -120,9 +119,7 @@ export default function SettingsPanel() {
       </IconButton>
 
       {/* Panel with Material-style animation */}
-      <Fade in={open} timeout={{ enter: 200, exit: 150 }}>
-        <Box>
-          <Collapse in={open} timeout={{ enter: 250, exit: 180 }}>
+      <Grow in={open} timeout={{ enter: 250, exit: 180 }} style={{ transformOrigin: 'top right' }}>
             <Box
               ref={panelRef}
               sx={{
@@ -137,7 +134,6 @@ export default function SettingsPanel() {
                   : `0 8px 40px rgba(0,60,140,0.18)`,
                 overflow: 'hidden',
                 minWidth: 200,
-                transformOrigin: 'top right',
                 transition: 'background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease',
               }}
             >
@@ -355,9 +351,7 @@ export default function SettingsPanel() {
                 }}
               />
             </Box>
-          </Collapse>
-        </Box>
-      </Fade>
+      </Grow>
     </Box>
   )
 }
