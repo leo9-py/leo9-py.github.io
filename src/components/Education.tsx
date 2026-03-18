@@ -32,7 +32,7 @@ export default function Education() {
                   <Typography variant="subtitle2" sx={{ color: 'var(--theme-primary)', fontWeight: 500, mt: 0.25 }}>
                     {edu.school}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  <Typography variant="caption" sx={{ color: 'text.primary' }}>
                     {edu.location}
                   </Typography>
                 </Box>
@@ -41,7 +41,8 @@ export default function Education() {
                     label={edu.date}
                     size="small"
                     variant="outlined"
-                    sx={{ borderColor: 'rgba(100,181,246,0.3)', color: 'text.secondary', fontSize: '0.75rem' }}
+                    color="primary"
+                    sx={{ fontSize: '0.75rem' }}
                   />
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <StarIcon sx={{ fontSize: 14, color: 'var(--theme-secondary)' }} />

@@ -19,7 +19,7 @@ export default function Skills() {
   const { settings } = useSettings()
   const scheme = useColorScheme()
   const isDark = settings.darkMode
-  const secondary = isDark ? scheme.secondary.dark : scheme.secondary.light
+  const practiceColor = isDark ? scheme.tertiary.dark : scheme.tertiary.light
 
   return (
     <Box component="section">
@@ -48,8 +48,8 @@ export default function Skills() {
                         fontSize: '0.8rem',
                         height: 28,
                         ...(cat === 'custom' && {
-                          borderColor: `${secondary}4d`,
-                          color: secondary,
+                          borderColor: `${practiceColor}4d`,
+                          color: practiceColor,
                           transition: 'color 0.5s ease, border-color 0.5s ease',
                         }),
                       }}

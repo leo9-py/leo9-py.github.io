@@ -44,11 +44,12 @@ export default function OpenSource() {
                   label={project.date}
                   size="small"
                   variant="outlined"
-                  sx={{ borderColor: 'rgba(100,181,246,0.3)', color: 'text.secondary', fontSize: '0.75rem' }}
+                  color="primary"
+                  sx={{ fontSize: '0.75rem' }}
                 />
               </Box>
 
-              <Typography variant="caption" sx={{ color: 'var(--theme-secondary)', fontStyle: 'italic', display: 'block', mb: 1.5 }}>
+              <Typography variant="subtitle2" sx={{ color: 'var(--theme-primary)', fontWeight: 500, display: 'block', mb: 1.5 }}>
                 {project.stack}
               </Typography>
 

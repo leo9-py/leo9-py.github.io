@@ -147,7 +147,7 @@ function ResumeContent() {
       >
         <Header />
 
-        <Container maxWidth="md" sx={{ py: { xs: 4, md: 6 } }}>
+        <Container maxWidth={false} sx={{ maxWidth: 1075, py: { xs: 4, md: 6 } }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 5, md: 7 } }}>
             <Summary />
             <Experience />

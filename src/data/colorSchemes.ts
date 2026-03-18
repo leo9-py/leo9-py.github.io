@@ -10,6 +10,8 @@ export interface ColorScheme {
   glow: { dark: [number, number, number]; light: [number, number, number] }
   /** Particle color in dark mode */
   particle: { dark: string; light: string }
+  /** Tertiary accent — used for third category (e.g. Practices chips) */
+  tertiary: { dark: string; light: string }
   /** Wave body tint */
   wave: { dark: string; light: string }
   /** Header gradient name heading — from / to */
@@ -21,6 +23,7 @@ export const COLOR_SCHEMES: ColorScheme[] = [
     name: 'Original',
     primary: { dark: '#64b5f6', light: '#0050a0' },
     secondary: { dark: '#ce93d8', light: '#7b1fa2' },
+    tertiary: { dark: '#81c784', light: '#388e3c' },
     swatch: '#64b5f6',
     glow: { dark: [80, 140, 220], light: [255, 235, 170] },
     particle: { dark: '#64b5f6', light: '#0050a0' },
@@ -30,7 +33,8 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     name: 'Yellow',
     primary: { dark: '#ffd54f', light: '#a67c00' },
-    secondary: { dark: '#ffe082', light: '#c49000' },
+    secondary: { dark: '#f48fb1', light: '#c2185b' },
+    tertiary: { dark: '#4dd0e1', light: '#00838f' },
     swatch: '#ffd54f',
     glow: { dark: [220, 190, 60], light: [255, 230, 120] },
     particle: { dark: '#ffd54f', light: '#a67c00' },
@@ -40,7 +44,8 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     name: 'Green',
     primary: { dark: '#66bb6a', light: '#2e7d32' },
-    secondary: { dark: '#a5d6a7', light: '#388e3c' },
+    secondary: { dark: '#ba68c8', light: '#7b1fa2' },
+    tertiary: { dark: '#ffb74d', light: '#e65100' },
     swatch: '#66bb6a',
     glow: { dark: [60, 180, 80], light: [180, 230, 140] },
     particle: { dark: '#66bb6a', light: '#2e7d32' },
@@ -50,7 +55,8 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     name: 'Pink',
     primary: { dark: '#f06292', light: '#c2185b' },
-    secondary: { dark: '#f48fb1', light: '#d81b60' },
+    secondary: { dark: '#ffd54f', light: '#f9a825' },
+    tertiary: { dark: '#4fc3f7', light: '#0277bd' },
     swatch: '#f06292',
     glow: { dark: [220, 60, 130], light: [255, 180, 200] },
     particle: { dark: '#f06292', light: '#c2185b' },
@@ -60,7 +66,8 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     name: 'Purple',
     primary: { dark: '#b388ff', light: '#6a1b9a' },
-    secondary: { dark: '#ce93d8', light: '#8e24aa' },
+    secondary: { dark: '#4dd0e1', light: '#00838f' },
+    tertiary: { dark: '#ffcc80', light: '#e65100' },
     swatch: '#b388ff',
     glow: { dark: [140, 80, 220], light: [200, 160, 255] },
     particle: { dark: '#b388ff', light: '#6a1b9a' },
@@ -70,7 +77,8 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     name: 'Cyan',
     primary: { dark: '#4dd0e1', light: '#00838f' },
-    secondary: { dark: '#80deea', light: '#00acc1' },
+    secondary: { dark: '#ffb74d', light: '#e65100' },
+    tertiary: { dark: '#ef9a9a', light: '#c62828' },
     swatch: '#4dd0e1',
     glow: { dark: [40, 190, 210], light: [140, 230, 240] },
     particle: { dark: '#4dd0e1', light: '#00838f' },
@@ -80,7 +88,8 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     name: 'Blue',
     primary: { dark: '#5c6bc0', light: '#1a237e' },
-    secondary: { dark: '#7986cb', light: '#283593' },
+    secondary: { dark: '#ff8a65', light: '#d84315' },
+    tertiary: { dark: '#a5d6a7', light: '#2e7d32' },
     swatch: '#5c6bc0',
     glow: { dark: [60, 80, 180], light: [140, 160, 240] },
     particle: { dark: '#5c6bc0', light: '#1a237e' },
@@ -90,7 +99,8 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     name: 'Magenta',
     primary: { dark: '#ea80fc', light: '#aa00ff' },
-    secondary: { dark: '#e040fb', light: '#d500f9' },
+    secondary: { dark: '#ffd54f', light: '#f9a825' },
+    tertiary: { dark: '#80cbc4', light: '#00695c' },
     swatch: '#ea80fc',
     glow: { dark: [200, 80, 240], light: [240, 160, 255] },
     particle: { dark: '#ea80fc', light: '#aa00ff' },
@@ -100,7 +110,8 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     name: 'Orange',
     primary: { dark: '#ffa726', light: '#e65100' },
-    secondary: { dark: '#ffb74d', light: '#f57c00' },
+    secondary: { dark: '#ce93d8', light: '#7b1fa2' },
+    tertiary: { dark: '#90caf9', light: '#1565c0' },
     swatch: '#ffa726',
     glow: { dark: [220, 140, 30], light: [255, 200, 120] },
     particle: { dark: '#ffa726', light: '#e65100' },
@@ -110,7 +121,8 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     name: 'Brown',
     primary: { dark: '#a1887f', light: '#4e342e' },
-    secondary: { dark: '#bcaaa4', light: '#5d4037' },
+    secondary: { dark: '#66bb6a', light: '#2e7d32' },
+    tertiary: { dark: '#81d4fa', light: '#0277bd' },
     swatch: '#8d6e63',
     glow: { dark: [140, 100, 70], light: [200, 170, 130] },
     particle: { dark: '#a1887f', light: '#4e342e' },
@@ -120,7 +132,8 @@ export const COLOR_SCHEMES: ColorScheme[] = [
   {
     name: 'Red',
     primary: { dark: '#ef5350', light: '#b71c1c' },
-    secondary: { dark: '#e57373', light: '#c62828' },
+    secondary: { dark: '#ffd54f', light: '#f9a825' },
+    tertiary: { dark: '#a5d6a7', light: '#2e7d32' },
     swatch: '#ef5350',
     glow: { dark: [220, 50, 50], light: [255, 140, 140] },
     particle: { dark: '#ef5350', light: '#b71c1c' },

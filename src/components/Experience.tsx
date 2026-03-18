@@ -38,9 +38,10 @@ export default function Experience() {
                     label={`${job.start} – ${job.end}`}
                     size="small"
                     variant="outlined"
-                    sx={{ borderColor: 'rgba(100,181,246,0.3)', color: 'text.secondary', fontSize: '0.75rem' }}
+                    color="primary"
+                    sx={{ fontSize: '0.75rem' }}
                   />
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  <Typography variant="caption" sx={{ color: 'text.primary' }}>
                     {job.location}
                   </Typography>
                 </Box>
