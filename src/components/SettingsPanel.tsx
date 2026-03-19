@@ -46,8 +46,21 @@ export default function SettingsPanel() {
   const { settings, toggle, setColorScheme } = useSettings()
   const [open, setOpen] = useState(false)
   const [focused, setFocused] = useState(0)
+  const [attentionSpin, setAttentionSpin] = useState(false)
+  const hasInteracted = useRef(false)
   const panelRef = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
+
+  // Attention spin after 15s if user hasn't interacted with settings, max 10s duration
+  useEffect(() => {
+    const startTimer = setTimeout(() => {
+      if (!hasInteracted.current) setAttentionSpin(true)
+    }, 15000)
+    const stopTimer = setTimeout(() => {
+      setAttentionSpin(false)
+    }, 25000)
+    return () => { clearTimeout(startTimer); clearTimeout(stopTimer) }
+  }, [])
 
   const isDark = settings.darkMode
   const scheme = COLOR_SCHEMES[settings.colorScheme] ?? COLOR_SCHEMES[0]
@@ -94,7 +107,11 @@ export default function SettingsPanel() {
       {/* Gear button */}
       <IconButton
         ref={btnRef}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          hasInteracted.current = true
+          setAttentionSpin(false)
+          setOpen((v) => !v)
+        }}
         sx={{
           width: 44,
           height: 44,
@@ -105,13 +122,27 @@ export default function SettingsPanel() {
           backdropFilter: 'blur(12px)',
           color: accent,
           transition: 'all 0.3s ease',
+          '@keyframes cogSpin': {
+            '0%': { transform: 'rotate(0deg)', filter: 'blur(0px)' },
+            '30%': { transform: 'rotate(180deg)', filter: 'blur(0px)' },
+            '50%': { transform: 'rotate(540deg)', filter: 'blur(1.5px)' },
+            '65%': { transform: 'rotate(720deg)', filter: 'blur(0px)' },
+            '100%': { transform: 'rotate(720deg)', filter: 'blur(0px)' },
+          },
+          '@keyframes borderFlash': {
+            '0%, 100%': { borderColor: isDark ? `${accent}40` : `${accent}33` },
+            '50%': { borderColor: accent },
+          },
+          ...(attentionSpin && !open && {
+            animation: 'cogSpin 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite, borderFlash 0.6s ease infinite',
+          }),
           '&:hover': {
             background: isDark
               ? `${accent}26`
               : `${accent}1a`,
             transform: 'rotate(30deg)',
           },
-          ...(open && { transform: 'rotate(45deg)' }),
+          ...(open && { transform: 'rotate(45deg)', animation: 'none' }),
         }}
         aria-label="Toggle settings"
       >
