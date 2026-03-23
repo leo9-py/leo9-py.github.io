@@ -25,7 +25,6 @@ export default function Header() {
   const cardRef = useRef<HTMLDivElement>(null)
   const [tiltX, setTiltX] = useState(0)
   const [tiltY, setTiltY] = useState(0)
-  const [hovered, setHovered] = useState(false)
 
   // Smooth lerp for header tilt
   const headerTargetRef = useRef({ tiltX: 0, tiltY: 0 })
@@ -233,7 +232,6 @@ export default function Header() {
   }, [])
 
   const handleMouseEnter = useCallback(() => {
-    setHovered(true)
     headerHoveredRef.current = true
     headerHoverStartRef.current = performance.now()
     cancelAnimationFrame(headerAnimRef.current)
@@ -242,7 +240,6 @@ export default function Header() {
   }, [headerTick])
 
   const handleMouseLeave = useCallback(() => {
-    setHovered(false)
     headerHoveredRef.current = false
     headerTargetRef.current.tiltX = 0
     headerTargetRef.current.tiltY = 0
