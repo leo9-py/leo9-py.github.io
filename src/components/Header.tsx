@@ -317,7 +317,7 @@ export default function Header() {
             fontWeight: 700,
             fontSize: { xs: '2rem', sm: '2.8rem', md: '3.4rem' },
             background: (() => {
-              if (!settings.pulsate) {
+              if (!settings.shimmer) {
                 return isDark
                   ? `linear-gradient(135deg, ${scheme.heading.dark[0]} 30%, ${scheme.heading.dark[1]} 100%)`
                   : `linear-gradient(135deg, ${scheme.heading.light[0]} 30%, ${scheme.heading.light[1]} 100%)`
@@ -327,11 +327,11 @@ export default function Header() {
               // Seamless loop: base → color → base (repeated) with smooth transitions
               return `linear-gradient(90deg, ${base} 0%, ${color} 25%, ${accent} 50%, ${color} 75%, ${base} 100%)`
             })(),
-            backgroundSize: settings.pulsate ? '200% 100%' : '100% 100%',
+            backgroundSize: settings.shimmer ? '200% 100%' : '100% 100%',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
-            animation: settings.pulsate ? 'waveColor 4s linear infinite' : 'none',
+            animation: settings.shimmer ? 'waveColor 4s linear infinite' : 'none',
             mb: 1,
           }}
         >
@@ -340,7 +340,7 @@ export default function Header() {
 
         <Typography
           variant="h5"
-          className={settings.pulsate ? 'pulsate-text' : undefined}
+          className={settings.shimmer ? 'shimmer-text' : undefined}
           sx={{
             color: 'var(--theme-primary)',
             fontWeight: 400,

@@ -31,8 +31,8 @@ const options: OptionDef[] = [
     icon: <AutoAwesomeIcon />,
   },
   {
-    key: 'pulsate',
-    label: 'Pulsate',
+    key: 'shimmer',
+    label: 'Shimmer',
     icon: <FiberManualRecordIcon />,
   },
   {

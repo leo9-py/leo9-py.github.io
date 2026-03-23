@@ -4,7 +4,7 @@ export interface Settings {
   darkMode: boolean
   gaussian: boolean
   particles: boolean
-  pulsate: boolean
+  shimmer: boolean
   waves: boolean
   colorScheme: number // index into COLOR_SCHEMES
 }
@@ -17,9 +17,9 @@ interface SettingsContextValue {
 
 const defaults: Settings = {
   darkMode: true,
-  gaussian: false,
+  gaussian: true,
   particles: true,
-  pulsate: false,
+  shimmer: true,
   waves: true,
   colorScheme: 0,
 }

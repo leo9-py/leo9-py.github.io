@@ -79,8 +79,8 @@ function ResumeContent() {
     s.setProperty('--theme-accent-rgb', `${accentRgb[0]},${accentRgb[1]},${accentRgb[2]}`)
   }, [primary, secondary, isDark, accentRgb])
 
-  const pulsateKeyframes = `
-    @keyframes pulsateText {
+  const shimmerKeyframes = `
+    @keyframes shimmerText {
       0%, 100% { opacity: 1; text-shadow: none; }
       50% {
         opacity: 0.85;
@@ -127,15 +127,15 @@ function ResumeContent() {
             color: 'var(--theme-primary) !important',
             fill: 'var(--theme-primary) !important',
           },
-          ...(settings.pulsate && {
-            '.pulsate-text': {
-              animation: 'pulsateText 4s ease-in-out infinite',
+          ...(settings.shimmer && {
+            '.shimmer-text': {
+              animation: 'shimmerText 4s ease-in-out infinite',
             },
           }),
         }}
       />
-      {settings.pulsate && (
-        <GlobalStyles styles={pulsateKeyframes} />
+      {settings.shimmer && (
+        <GlobalStyles styles={shimmerKeyframes} />
       )}
 
       <Box
