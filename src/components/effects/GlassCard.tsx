@@ -11,6 +11,8 @@ interface Props {
   sx?: SxProps<Theme>
 }
 
+const EASE_IN_DURATION = 0.4 // seconds to ramp up responsiveness
+
 export default function GlassCard({ children, sx }: Props) {
   const { settings } = useSettings()
   const ref = useRef<HTMLDivElement>(null)
@@ -25,48 +27,62 @@ export default function GlassCard({ children, sx }: Props) {
   const currentRef = useRef({ tiltX: 0, tiltY: 0, shineX: 50, shineY: 50 })
   const animRef = useRef<number>(0)
   const hoveredRef = useRef(false)
+  const hoverStartRef = useRef(0)
 
   const isDark = settings.darkMode
   const scheme = useColorScheme()
   const accentRgb = hexToRgb(isDark ? scheme.primary.dark : scheme.primary.light)
   const glassEnabled = settings.gaussian
 
-  // Smooth animation loop — lerp current values toward target
-  useEffect(() => {
-    if (!glassEnabled) return
+  const tick = useCallback((ts: number, lastTsBox: { v: number | null }) => {
+    if (lastTsBox.v === null) lastTsBox.v = ts
+    const dt = Math.min((ts - lastTsBox.v) / 1000, 0.05)
+    lastTsBox.v = ts
 
-    let lastTs: number | null = null
+    const cur = currentRef.current
+    const tgt = targetRef.current
 
-    function tick(ts: number) {
-      if (lastTs === null) lastTs = ts
-      const dt = Math.min((ts - lastTs) / 1000, 0.05)
-      lastTs = ts
-
-      const cur = currentRef.current
-      const tgt = targetRef.current
-      const lerpFactor = 1 - Math.pow(0.02, dt) // ~5-6 frames to settle, smooth ease-out
-
-      cur.tiltX += (tgt.tiltX - cur.tiltX) * lerpFactor
-      cur.tiltY += (tgt.tiltY - cur.tiltY) * lerpFactor
-      cur.shineX += (tgt.shineX - cur.shineX) * lerpFactor
-      cur.shineY += (tgt.shineY - cur.shineY) * lerpFactor
-
-      setTiltX(cur.tiltX)
-      setTiltY(cur.tiltY)
-      setShineX(cur.shineX)
-      setShineY(cur.shineY)
-
-      // Keep animating while hovered or values haven't settled
-      const settled = !hoveredRef.current &&
-        Math.abs(cur.tiltX) < 0.01 && Math.abs(cur.tiltY) < 0.01
-      if (!settled) {
-        animRef.current = requestAnimationFrame(tick)
-      }
+    // Ease-in: ramp up lerp speed over first 400ms of hover
+    let responsiveness: number
+    if (hoveredRef.current) {
+      const hoverElapsed = (ts - hoverStartRef.current) / 1000
+      const ramp = Math.min(hoverElapsed / EASE_IN_DURATION, 1)
+      // Quadratic ease-in: starts slow, accelerates
+      const easeIn = ramp * ramp
+      // Blend between sluggish (0.4) and full responsiveness (0.02)
+      const base = 0.4 - 0.38 * easeIn
+      responsiveness = base
+    } else {
+      // Ease-out: smooth return to rest
+      responsiveness = 0.008
     }
 
-    animRef.current = requestAnimationFrame(tick)
+    const lerpFactor = 1 - Math.pow(responsiveness, dt)
+
+    cur.tiltX += (tgt.tiltX - cur.tiltX) * lerpFactor
+    cur.tiltY += (tgt.tiltY - cur.tiltY) * lerpFactor
+    cur.shineX += (tgt.shineX - cur.shineX) * lerpFactor
+    cur.shineY += (tgt.shineY - cur.shineY) * lerpFactor
+
+    setTiltX(cur.tiltX)
+    setTiltY(cur.tiltY)
+    setShineX(cur.shineX)
+    setShineY(cur.shineY)
+
+    const settled = !hoveredRef.current &&
+      Math.abs(cur.tiltX) < 0.01 && Math.abs(cur.tiltY) < 0.01
+    if (!settled) {
+      animRef.current = requestAnimationFrame((t) => tick(t, lastTsBox))
+    }
+  }, [])
+
+  // Start animation loop when glass is enabled
+  useEffect(() => {
+    if (!glassEnabled) return
+    const lastTsBox = { v: null as number | null }
+    animRef.current = requestAnimationFrame((t) => tick(t, lastTsBox))
     return () => cancelAnimationFrame(animRef.current)
-  }, [glassEnabled])
+  }, [glassEnabled, tick])
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const el = ref.current
@@ -83,36 +99,12 @@ export default function GlassCard({ children, sx }: Props) {
   const handleMouseEnter = useCallback(() => {
     setHovered(true)
     hoveredRef.current = true
+    hoverStartRef.current = performance.now()
     // Restart animation loop
     cancelAnimationFrame(animRef.current)
-    let lastTs: number | null = null
-    function tick(ts: number) {
-      if (lastTs === null) lastTs = ts
-      const dt = Math.min((ts - lastTs) / 1000, 0.05)
-      lastTs = ts
-
-      const cur = currentRef.current
-      const tgt = targetRef.current
-      const lerpFactor = 1 - Math.pow(0.02, dt)
-
-      cur.tiltX += (tgt.tiltX - cur.tiltX) * lerpFactor
-      cur.tiltY += (tgt.tiltY - cur.tiltY) * lerpFactor
-      cur.shineX += (tgt.shineX - cur.shineX) * lerpFactor
-      cur.shineY += (tgt.shineY - cur.shineY) * lerpFactor
-
-      setTiltX(cur.tiltX)
-      setTiltY(cur.tiltY)
-      setShineX(cur.shineX)
-      setShineY(cur.shineY)
-
-      const settled = !hoveredRef.current &&
-        Math.abs(cur.tiltX) < 0.01 && Math.abs(cur.tiltY) < 0.01
-      if (!settled) {
-        animRef.current = requestAnimationFrame(tick)
-      }
-    }
-    animRef.current = requestAnimationFrame(tick)
-  }, [])
+    const lastTsBox = { v: null as number | null }
+    animRef.current = requestAnimationFrame((t) => tick(t, lastTsBox))
+  }, [tick])
 
   const handleMouseLeave = useCallback(() => {
     setHovered(false)
