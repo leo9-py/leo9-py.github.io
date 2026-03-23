@@ -25,26 +25,38 @@ interface WaveLayer {
   alpha: number
 }
 
-const WAVE_LAYERS: WaveLayer[] = [
+// Base definitions — phases and harmonics are randomized per mount
+const WAVE_LAYER_BASES = [
   {
     baseYFrac: 0.83,
     harmonics: [
-      { amp: 0.058, freq: 0.7, speed: 0.28 },
-      { amp: 0.030, freq: 1.5, speed: -0.18 },
+      { amp: 0.058, freqBase: 0.7, speedBase: 0.28 },
+      { amp: 0.030, freqBase: 1.5, speedBase: -0.18 },
     ],
-    phase: Math.PI * 0.65,
     alpha: 0.45,
   },
   {
     baseYFrac: 0.76,
     harmonics: [
-      { amp: 0.072, freq: 0.8, speed: 0.22 },
-      { amp: 0.038, freq: 1.6, speed: 0.14 },
+      { amp: 0.072, freqBase: 0.8, speedBase: 0.22 },
+      { amp: 0.038, freqBase: 1.6, speedBase: 0.14 },
     ],
-    phase: 0,
     alpha: 0.85,
   },
 ]
+
+function generateLayers(): WaveLayer[] {
+  return WAVE_LAYER_BASES.map(base => ({
+    baseYFrac: base.baseYFrac,
+    harmonics: base.harmonics.map(h => ({
+      amp: h.amp * (0.85 + Math.random() * 0.3),
+      freq: h.freqBase * (0.9 + Math.random() * 0.2),
+      speed: h.speedBase * (0.85 + Math.random() * 0.3),
+    })),
+    phase: Math.random() * Math.PI * 2,
+    alpha: base.alpha,
+  }))
+}
 
 const FOAM_COUNT = 28
 
@@ -108,7 +120,9 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       layerIdx: Math.random() < 0.65 ? 1 : 0,
     }))
 
-    let t = 0
+    // Randomize layers and starting time each mount
+    const layers = generateLayers()
+    let t = Math.random() * 100
     let lastTs: number | null = null
     const startTime = performance.now()
     const SURGE_DURATION = 3.0 // seconds to ease from fast to normal
@@ -189,7 +203,7 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       const fm = rgbStr(currentRef.current.foam)
 
       for (const fb of foam) {
-        const layer = WAVE_LAYERS[fb.layerIdx]
+        const layer = layers[fb.layerIdx]
         const x = fb.xFrac * w
         const y = waveY(x, w, h, layer, ampScale) + fb.yOffset
         const alpha = Math.max(0, 0.5 + 0.5 * Math.sin(t * fb.speed + fb.phaseSeed)) * 0.18
@@ -232,7 +246,7 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
 
       // Boost amplitude during surge for dramatic entrance
       const ampScale = 1 + 0.6 * (1 - surgeProgress) ** 2
-      for (const layer of WAVE_LAYERS) drawLayer(layer, ampScale)
+      for (const layer of layers) drawLayer(layer, ampScale)
       drawFoam(ampScale)
 
       animRef.current = requestAnimationFrame(tick)
