@@ -27,6 +27,47 @@ export default function Header() {
   const [tiltY, setTiltY] = useState(0)
   const [hovered, setHovered] = useState(false)
 
+  // Smooth lerp for header tilt
+  const headerTargetRef = useRef({ tiltX: 0, tiltY: 0 })
+  const headerCurrentRef = useRef({ tiltX: 0, tiltY: 0 })
+  const headerAnimRef = useRef<number>(0)
+  const headerHoveredRef = useRef(false)
+  const headerHoverStartRef = useRef(0)
+
+  const HEADER_EASE_IN = 0.4
+
+  const headerTick = useCallback((ts: number, lastTsBox: { v: number | null }) => {
+    if (lastTsBox.v === null) lastTsBox.v = ts
+    const dt = Math.min((ts - lastTsBox.v) / 1000, 0.05)
+    lastTsBox.v = ts
+
+    const cur = headerCurrentRef.current
+    const tgt = headerTargetRef.current
+
+    let responsiveness: number
+    if (headerHoveredRef.current) {
+      const elapsed = (ts - headerHoverStartRef.current) / 1000
+      const ramp = Math.min(elapsed / HEADER_EASE_IN, 1)
+      const easeIn = ramp * ramp
+      responsiveness = 0.4 - 0.38 * easeIn
+    } else {
+      responsiveness = 0.008
+    }
+
+    const lerpFactor = 1 - Math.pow(responsiveness, dt)
+    cur.tiltX += (tgt.tiltX - cur.tiltX) * lerpFactor
+    cur.tiltY += (tgt.tiltY - cur.tiltY) * lerpFactor
+
+    setTiltX(cur.tiltX)
+    setTiltY(cur.tiltY)
+
+    const settled = !headerHoveredRef.current &&
+      Math.abs(cur.tiltX) < 0.01 && Math.abs(cur.tiltY) < 0.01
+    if (!settled) {
+      headerAnimRef.current = requestAnimationFrame((t) => headerTick(t, lastTsBox))
+    }
+  }, [])
+
   // Typewriter effect for subtitle
   const DESCRIPTORS = [
     title,
@@ -187,15 +228,24 @@ export default function Header() {
     const rect = el.getBoundingClientRect()
     const dx = (e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)
     const dy = (e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)
-    setTiltX(-dy * 3)
-    setTiltY( dx * 3)
+    headerTargetRef.current.tiltX = -dy * 3
+    headerTargetRef.current.tiltY =  dx * 3
   }, [])
 
-  const handleMouseEnter = useCallback(() => setHovered(true), [])
+  const handleMouseEnter = useCallback(() => {
+    setHovered(true)
+    headerHoveredRef.current = true
+    headerHoverStartRef.current = performance.now()
+    cancelAnimationFrame(headerAnimRef.current)
+    const lastTsBox = { v: null as number | null }
+    headerAnimRef.current = requestAnimationFrame((t) => headerTick(t, lastTsBox))
+  }, [headerTick])
+
   const handleMouseLeave = useCallback(() => {
     setHovered(false)
-    setTiltX(0)
-    setTiltY(0)
+    headerHoveredRef.current = false
+    headerTargetRef.current.tiltX = 0
+    headerTargetRef.current.tiltY = 0
   }, [])
 
   return (
@@ -257,9 +307,6 @@ export default function Header() {
             ? `0 2px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10)`
             : `0 2px 24px rgba(var(--theme-accent-rgb),0.08), inset 0 1px 0 rgba(255,255,255,0.70)`,
           transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
-          transition: hovered
-            ? 'transform 0.10.5s ease'
-            : 'transform 0.6s cubic-bezier(0.23,1,0.32,1)',
           willChange: 'transform',
         }}
       >
