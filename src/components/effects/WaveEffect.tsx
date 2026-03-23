@@ -110,17 +110,20 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
 
     let t = 0
     let lastTs: number | null = null
+    const startTime = performance.now()
+    const SURGE_DURATION = 3.0 // seconds to ease from fast to normal
+    const SURGE_MULTIPLIER = 4.5 // initial speed multiplier
 
-    function waveY(x: number, w: number, h: number, layer: WaveLayer): number {
+    function waveY(x: number, w: number, h: number, layer: WaveLayer, ampScale = 1): number {
       const xn = x / w
       let y = layer.baseYFrac * h
       for (const harm of layer.harmonics) {
-        y += h * harm.amp * Math.sin(xn * Math.PI * 2 * harm.freq + t * harm.speed + layer.phase)
+        y += h * harm.amp * ampScale * Math.sin(xn * Math.PI * 2 * harm.freq + t * harm.speed + layer.phase)
       }
       return y
     }
 
-    function drawLayer(layer: WaveLayer) {
+    function drawLayer(layer: WaveLayer, ampScale = 1) {
       const w = canvas.offsetWidth
       const h = canvas.offsetHeight
       const steps = 180
@@ -129,7 +132,7 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       const pts: Array<[number, number]> = []
       for (let i = 0; i <= steps; i++) {
         const x = -20 + (i / steps) * (w + 40)
-        pts.push([x, waveY(x, w, h, layer)])
+        pts.push([x, waveY(x, w, h, layer, ampScale)])
       }
 
       const avgY = pts.reduce((s, [, y]) => s + y, 0) / pts.length
@@ -180,7 +183,7 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       ctx.restore()
     }
 
-    function drawFoam() {
+    function drawFoam(ampScale = 1) {
       const w = canvas.offsetWidth
       const h = canvas.offsetHeight
       const fm = rgbStr(currentRef.current.foam)
@@ -188,7 +191,7 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       for (const fb of foam) {
         const layer = WAVE_LAYERS[fb.layerIdx]
         const x = fb.xFrac * w
-        const y = waveY(x, w, h, layer) + fb.yOffset
+        const y = waveY(x, w, h, layer, ampScale) + fb.yOffset
         const alpha = Math.max(0, 0.5 + 0.5 * Math.sin(t * fb.speed + fb.phaseSeed)) * 0.18
 
         ctx.save()
@@ -205,7 +208,13 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       if (lastTs === null) lastTs = ts
       const dt = Math.min((ts - lastTs) / 1000, 0.05)
       lastTs = ts
-      t += dt
+
+      // Surge: start fast and ease down to normal speed
+      const elapsed = (ts - startTime) / 1000
+      const surgeProgress = Math.min(elapsed / SURGE_DURATION, 1)
+      // Ease-out: fast deceleration curve
+      const speedMultiplier = 1 + (SURGE_MULTIPLIER - 1) * (1 - surgeProgress) ** 2
+      t += dt * speedMultiplier
 
       // Lerp colors toward target
       const lerpSpeed = Math.min(1, dt * 2.8)
@@ -221,8 +230,10 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       const h = canvas.offsetHeight
       ctx.clearRect(0, 0, w, h)
 
-      for (const layer of WAVE_LAYERS) drawLayer(layer)
-      drawFoam()
+      // Boost amplitude during surge for dramatic entrance
+      const ampScale = 1 + 0.6 * (1 - surgeProgress) ** 2
+      for (const layer of WAVE_LAYERS) drawLayer(layer, ampScale)
+      drawFoam(ampScale)
 
       animRef.current = requestAnimationFrame(tick)
     }
