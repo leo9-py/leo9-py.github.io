@@ -125,8 +125,9 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
     let t = Math.random() * 100
     let lastTs: number | null = null
     const startTime = performance.now()
-    const SURGE_DURATION = 3.0 // seconds to ease from fast to normal
+    const SURGE_DURATION = 5.0 // seconds to ease from fast to normal
     const SURGE_MULTIPLIER = 4.5 // initial speed multiplier
+    const FILL_DURATION = 5.0 // seconds for water to "flow in"
 
     function waveY(x: number, w: number, h: number, layer: WaveLayer, ampScale = 1): number {
       const xn = x / w
@@ -137,7 +138,7 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       return y
     }
 
-    function drawLayer(layer: WaveLayer, ampScale = 1) {
+    function drawLayer(layer: WaveLayer, ampScale = 1, yShift = 0, opacityScale = 1) {
       const w = canvas.offsetWidth
       const h = canvas.offsetHeight
       const steps = 180
@@ -146,12 +147,13 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       const pts: Array<[number, number]> = []
       for (let i = 0; i <= steps; i++) {
         const x = -20 + (i / steps) * (w + 40)
-        pts.push([x, waveY(x, w, h, layer, ampScale)])
+        pts.push([x, waveY(x, w, h, layer, ampScale) + yShift])
       }
 
       const avgY = pts.reduce((s, [, y]) => s + y, 0) / pts.length
 
       ctx.save()
+      ctx.globalAlpha = opacityScale
       ctx.beginPath()
       ctx.moveTo(pts[0][0], pts[0][1])
       for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1])
@@ -197,7 +199,7 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       ctx.restore()
     }
 
-    function drawFoam(ampScale = 1) {
+    function drawFoam(ampScale = 1, yShift = 0, opacityScale = 1) {
       const w = canvas.offsetWidth
       const h = canvas.offsetHeight
       const fm = rgbStr(currentRef.current.foam)
@@ -205,8 +207,8 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       for (const fb of foam) {
         const layer = layers[fb.layerIdx]
         const x = fb.xFrac * w
-        const y = waveY(x, w, h, layer, ampScale) + fb.yOffset
-        const alpha = Math.max(0, 0.5 + 0.5 * Math.sin(t * fb.speed + fb.phaseSeed)) * 0.18
+        const y = waveY(x, w, h, layer, ampScale) + fb.yOffset + yShift
+        const alpha = Math.max(0, 0.5 + 0.5 * Math.sin(t * fb.speed + fb.phaseSeed)) * 0.18 * opacityScale
 
         ctx.save()
         ctx.globalAlpha = alpha
@@ -244,10 +246,17 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
       const h = canvas.offsetHeight
       ctx.clearRect(0, 0, w, h)
 
+      // Water fill-in: waves rise from below and fade in
+      const fillProgress = Math.min(elapsed / FILL_DURATION, 1)
+      // Ease-out cubic for smooth rise
+      const fillEase = 1 - (1 - fillProgress) ** 3
+      const yShift = (1 - fillEase) * h * 0.35 // start 35% lower
+      const opacityScale = fillEase
+
       // Boost amplitude during surge for dramatic entrance
       const ampScale = 1 + 0.6 * (1 - surgeProgress) ** 2
-      for (const layer of layers) drawLayer(layer, ampScale)
-      drawFoam(ampScale)
+      for (const layer of layers) drawLayer(layer, ampScale, yShift, opacityScale)
+      drawFoam(ampScale, yShift, opacityScale)
 
       animRef.current = requestAnimationFrame(tick)
     }
