@@ -126,8 +126,9 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
     let lastTs: number | null = null
     const startTime = performance.now()
     const SURGE_DURATION = 5.0 // seconds to ease from fast to normal
-    const SURGE_MULTIPLIER = 4.5 // initial speed multiplier
+    const SURGE_MULTIPLIER = 5.0 // initial speed multiplier
     const FILL_DURATION = 5.0 // seconds for water to "flow in"
+    const OPACITY_DURATION = 1.5 // seconds for opacity to reach full (faster than position)
 
     function waveY(x: number, w: number, h: number, layer: WaveLayer, ampScale = 1): number {
       const xn = x / w
@@ -248,10 +249,11 @@ export default function WaveEffect({ position = 'bottom', flip = false }: Props)
 
       // Water fill-in: waves rise from below and fade in
       const fillProgress = Math.min(elapsed / FILL_DURATION, 1)
-      // Ease-out cubic for smooth rise
       const fillEase = 1 - (1 - fillProgress) ** 3
       const yShift = (1 - fillEase) * h * 0.35 // start 35% lower
-      const opacityScale = fillEase
+      // Opacity ramps up faster so waves are visible while still fast
+      const opacityProgress = Math.min(elapsed / OPACITY_DURATION, 1)
+      const opacityScale = opacityProgress * opacityProgress // quadratic ease-in
 
       // Boost amplitude during surge for dramatic entrance
       const ampScale = 1 + 0.6 * (1 - surgeProgress) ** 2
